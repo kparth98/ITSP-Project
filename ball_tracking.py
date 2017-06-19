@@ -1,6 +1,8 @@
 import numpy as np
 import argparse
 import cv2
+import math
+from collections import deque
 
 frame = None
 orig = None
@@ -10,6 +12,9 @@ iy = 0
 limits = None
 draw = False
 center = None
+prevgrad = 0
+passes = 0
+pts = deque()
 
 
 def getArguements():
@@ -92,11 +97,30 @@ def detectBall():
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
+        trackBall()
         if radius > 5:
             cv2.circle(frame, (int(x), int(y)), int(radius),
                        (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
+
+
+def trackBall():
+    global grad, prevgrad, passes
+    pts.appendleft(center)
+
+    for i in xrange(1, len(pts)):
+        cv2.line(frame, pts[i-1], pts[i], (0, 0, 255), 2, cv2.LINE_AA)
+
+    l = len(pts)
+    if l >= 10 and math.sqrt((pts[9][1] - pts[0][1]) ** 2 + (pts[9][0] - pts[0][0]) ** 2) >= 20:
+        grad = np.arctan2((pts[9][1] - pts[0][1]), (pts[9][0] - pts[0][0]))
+        grad = grad * 180 / np.pi
+        grad %= 360
+
+        if(math.fabs(grad - prevgrad) >= 20):
+            print('Ball Passed ' + str(passes))
+            passes += 1
+        prevgrad = grad
 
 
 if __name__ == '__main__':
