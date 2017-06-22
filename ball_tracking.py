@@ -112,12 +112,12 @@ def trackBall():
         cv2.line(frame, pts[i-1], pts[i], (0, 0, 255), 2, cv2.LINE_AA)
 
     l = len(pts)
-    if l >= 10 and math.sqrt((pts[9][1] - pts[0][1]) ** 2 + (pts[9][0] - pts[0][0]) ** 2) >= 20:
+    if l >= 10:
         grad = np.arctan2((pts[9][1] - pts[0][1]), (pts[9][0] - pts[0][0]))
         grad = grad * 180 / np.pi
         grad %= 360
 
-        if(math.fabs(grad - prevgrad) >= 20):
+        if(math.fabs(grad - prevgrad) >= 20) or math.sqrt((pts[9][1] - pts[0][1]) ** 2 + (pts[9][0] - pts[0][0]) ** 2) >= 20:
             print('Ball Passed ' + str(passes))
             passes += 1
         prevgrad = grad
