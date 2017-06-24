@@ -117,7 +117,7 @@ def trackBall():
         grad = grad * 180 / np.pi
         grad %= 360
 
-        if(math.fabs(grad - prevgrad) >= 20) or math.sqrt((pts[9][1] - pts[0][1]) ** 2 + (pts[9][0] - pts[0][0]) ** 2) >= 20:
+        if(math.fabs(grad - prevgrad) >= 20) and math.sqrt((pts[9][1] - pts[0][1]) ** 2 + (pts[9][0] - pts[0][0]) ** 2) >= 20:
             print('Ball Passed ' + str(passes))
             passes += 1
         prevgrad = grad
