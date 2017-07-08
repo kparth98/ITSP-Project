@@ -10,13 +10,14 @@ center = None
 prevgrad = 0
 passes = 0
 pts = deque()
+orig = None
 
 def trackBall():
-    global grad, prevgrad, passes, center
+    global grad, prevgrad, passes, center, orig
     pts.appendleft(center)
 
     for i in xrange(1, len(pts)):
-        cv2.line(frame, pts[i-1], pts[i], (0, 0, 255), 2, cv2.LINE_AA)
+        cv2.line(orig, pts[i-1], pts[i], (0, 0, 255), 2, cv2.LINE_AA)
 
     l = len(pts)
     if l >= 10:
@@ -39,7 +40,6 @@ if __name__ == '__main__':
     else:
         camera = cv2.VideoCapture(args["video"])
 
-    #fgbg = cv2.createBackgroundSubtractorKNN(history=20, dist2Threshold=400.0, detectShadows=False)
     fgbg = cv2.createBackgroundSubtractorMOG2(history=20,detectShadows=False)
     while True:
         (grabbed, frame) = camera.read()
@@ -48,24 +48,28 @@ if __name__ == '__main__':
             break
 
         frame = track_utils.resize(frame)
+        orig = frame.copy()
+
         frame = track_utils.removeBG(frame,fgbg)
 
         if limits is not None:
             center,cnt = track_utils.detectBallThresh(frame,limits)
             if cnt is not None:
                 (x,y),radius = cv2.minEnclosingCircle(cnt)
-                cv2.circle(frame,(int(x),int(y)),int(radius),(255,255,0),2)
-                cv2.circle(frame,center,2,(0,0,255),-1)
+                cv2.circle(orig,(int(x),int(y)),int(radius),(255,255,0),2)
+                cv2.circle(orig,center,2,(0,0,255),-1)
                 trackBall()
 
-        cv2.imshow('frame', frame)
+        cv2.imshow('frame', orig)
         key = cv2.waitKey(1) & 0xFF
 
         if key == ord("q"):
             break
         elif key == ord('i') and limits is None:
-            roi = track_utils.getROI(frame)
-            limits = track_utils.getLimits(roi)
+            roi = track_utils.getROIvid(orig, 'input ball')
+
+            if roi is not None:
+                limits = track_utils.getLimits(roi)
 
     camera.release()
     cv2.destroyAllWindows()

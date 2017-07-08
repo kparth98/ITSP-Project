@@ -7,9 +7,18 @@ from collections import deque
 img = None
 orig = None
 roi = None
+roi2, roi2_init = None,None
+
+kernel = np.array([[0, 0, 1, 1, 0, 0],
+                   [0, 1, 1, 1, 1, 0],
+                   [1, 1, 1, 1, 1, 1],
+                   [1, 1, 1, 1, 1, 1],
+                   [0, 1, 1, 1, 1, 0],
+                   [0, 0, 1, 1, 0, 0]],dtype=np.uint8)
+
 ix,iy = 0,0
 draw = False
-rad_thresh = 30
+rad_thresh = 15
 
 def getArguements():
     ap = argparse.ArgumentParser()
@@ -24,7 +33,7 @@ def resize(img,width=400.0):
     img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
     return img
 
-def selectROIvid(event, x, y, flag, param):
+def selectROI(event, x, y, flag, param):
     global img, ix, iy, draw, orig, roi
     if event == cv2.EVENT_LBUTTONDOWN:
         ix = x
@@ -44,21 +53,41 @@ def selectROIvid(event, x, y, flag, param):
             roi = orig[iy:y1, ix:x1]
         draw = False
 
-def getROI(frame):
+def getROIvid(frame, winName = 'input'):
     global img, orig, roi
+    roi = None
     img = frame.copy()
     orig = frame.copy()
-    cv2.namedWindow('input')
-    cv2.setMouseCallback('input', selectROIvid)
+    cv2.namedWindow(winName)
+    cv2.setMouseCallback(winName, selectROI)
     while True:
-        cv2.imshow('input', img)
+        cv2.imshow(winName, img)
         if roi is not None:
-            cv2.destroyWindow('input')
+            cv2.destroyWindow(winName)
             return roi
 
         k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
-            cv2.destroyWindow('input')
+            cv2.destroyWindow(winName)
+            break
+
+    return roi
+
+def getROIext(image,winName = 'input'):
+    global img, orig, roi2, roi2_init
+    img = image.copy()
+    orig = image.copy()
+    cv2.namedWindow(winName)
+    cv2.setMouseCallback(winName, selectROI)
+    while True:
+        cv2.imshow(winName, img)
+        if roi is not None:
+            cv2.destroyWindow(winName)
+            return roi
+
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('q'):
+            cv2.destroyWindow(winName)
             break
 
     return roi
@@ -71,6 +100,19 @@ def getLimits(roi):
     limits = [(int(np.amax(h)), int(np.amax(s)), 255), (int(np.amin(h)), int(np.amin(s)), int(np.amin(v)))]
     return limits
 
+def applyMorphTransforms(mask):
+    global kernel
+    lower = 150
+    upper = 255
+
+    #mask = cv2.inRange(mask, lower, upper)
+    mask = cv2.dilate(mask, kernel)
+    mask = cv2.erode(mask, np.ones((5, 5)))
+    mask = cv2.GaussianBlur(mask, (11, 11), 5)
+    mask = cv2.inRange(mask, lower, upper)
+    return mask
+
+
 def detectBallThresh(frame,limits):
     global rad_thresh
     upper = limits[0]
@@ -80,27 +122,25 @@ def detectBallThresh(frame,limits):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     mask = cv2.inRange(hsv, lower, upper)
-    mask = cv2.erode(mask, np.ones((5,5)))
-    mask = cv2.dilate(mask, np.ones((5,5)), iterations=2)
-    mask = cv2.erode(mask, np.ones((5, 5)))
+    mask = applyMorphTransforms(mask)
     cv2.imshow('mask', mask)
 
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)[-2]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
+    flag = False
     i=0
     if len(cnts) > 0:
-        #c = sorted(cnts, key=cv2.contourArea, reverse=True)
         for i in range(len(cnts)):
             (_, radius) = cv2.minEnclosingCircle(cnts[i])
-            if radius < rad_thresh :
+            if radius < rad_thresh and radius > 5:
+                flag = True
                 break
+        if not flag:
+            return None, None
+
         M = cv2.moments(cnts[i])
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        #trackBall()
-        #cv2.circle(frame, (int(x), int(y)), int(radius),
-                   #(0, 255, 255), 2)
-        #cv2.circle(frame, center, 5, (0, 0, 255), -1)
         return center, cnts[i]
     else:
         return None, None
@@ -115,9 +155,6 @@ def detectBallHB(frame, roi):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     backProj = cv2.calcBackProject([hsv], [0, 1], roiHist, [0, 180, 0, 256], 1)
     mask = cv2.inRange(backProj, 50, 255)
-    #mask = cv2.inRange(backProj, 0.5, 1)
-    #mask = backProj.copy()
-    #mask = cv2.bitwise_not(mask)
     mask = cv2.erode(mask, np.ones((5, 5)))
     mask = cv2.dilate(mask, np.ones((5, 5)))
 
@@ -130,7 +167,7 @@ def detectBallHB(frame, roi):
     if len(cnts) > 0:
         for i in range(len(cnts)):
             (_, radius) = cv2.minEnclosingCircle(cnts[i])
-            if radius < rad_thresh and radius>3:
+            if radius < rad_thresh and radius>5:
                 break
         M = cv2.moments(cnts[i])
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
@@ -161,3 +198,20 @@ def removeBG(frame, fgbg):
     bg_mask = cv2.dilate(bg_mask, np.ones((5, 5)))
     frame = cv2.bitwise_and(frame, frame, mask=bg_mask)
     return frame
+
+def getHist(frame):
+    roi_hist_A, roi_hist_B = None, None
+
+    if roi_hist_A is None:
+        roi = getROIvid(frame,'input team A')
+        roi = cv2.cvtColor(roi,cv2.COLOR_BGR2HSV)
+        roi_hist_A = cv2.calcHist([roi],[0,1],None,[180,256],[0,180,0,256])
+        roi_hist_A = cv2.normalize(roi_hist_A, roi_hist_A, 0, 255, cv2.NORM_MINMAX)
+
+    if roi_hist_B is None:
+        roi = getROIvid(frame, 'input team B')
+        roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+        roi_hist_B = cv2.calcHist([roi], [0, 1], None, [180, 256], [0, 180, 0, 256])
+        roi_hist_B = cv2.normalize(roi_hist_B, roi_hist_B, 0, 255, cv2.NORM_MINMAX)
+
+    return roi_hist_A, roi_hist_B
