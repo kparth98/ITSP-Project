@@ -102,15 +102,28 @@ def getLimits(roi):
 
 def applyMorphTransforms(mask):
     global kernel
-    lower = 150
+    lower = 100
     upper = 255
 
     #mask = cv2.inRange(mask, lower, upper)
+    mask = cv2.GaussianBlur(mask, (11, 11), 5)
+    mask = cv2.inRange(mask, lower, upper)
     mask = cv2.dilate(mask, kernel)
     mask = cv2.erode(mask, np.ones((5, 5)))
+
+    return mask
+
+def applyMorphTransforms2(backProj):
+    global kernel
+    lower = 50
+    upper = 255
+    mask = cv2.inRange(backProj, lower, upper)
+    mask = cv2.dilate(mask, kernel)
+    mask = cv2.erode(mask, np.ones((3, 3)))
     mask = cv2.GaussianBlur(mask, (11, 11), 5)
     mask = cv2.inRange(mask, lower, upper)
     return mask
+
 
 
 def detectBallThresh(frame,limits):
