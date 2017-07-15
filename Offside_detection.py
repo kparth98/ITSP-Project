@@ -1,3 +1,12 @@
+# USAGE
+# To detect offside in a pre-recorded video, type the following in terminal:
+# python Offside_detection.py -v 'name of video file'
+#
+# To detect offside from live camera feed:
+# python Offside_detection.py
+#
+# while running the program, press 'i' to input and 'q' to quit
+
 import cv2
 import numpy as np
 import track_utils
@@ -84,7 +93,7 @@ def trackBall():
                         print('Not offside')
 
                     passes += 1
-                    print('Ball Passed ' + str(passes))
+                    #print('Ball Passed ' + str(passes))
                 prevPasser = passerIndex
                 prevTeam = team
 
@@ -104,7 +113,7 @@ def detectPlayers():
     if roi_hist_A is not None:
         backProjA = cv2.calcBackProject([hsv], [0, 1], roi_hist_A, [0, 180, 0, 256], 1)
         maskA = track_utils.applyMorphTransforms2(backProjA)
-        cv2.imshow('mask a', maskA)
+        #cv2.imshow('mask a', maskA)
 
         cnts = cv2.findContours(maskA.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
@@ -131,7 +140,7 @@ def detectPlayers():
     if roi_hist_B is not None:
         backProjB = cv2.calcBackProject([hsv], [0, 1], roi_hist_B, [0, 180, 0, 256], 1)
         maskB = track_utils.applyMorphTransforms2(backProjB)
-        cv2.imshow('mask b', maskB)
+        #cv2.imshow('mask b', maskB)
 
         cnts = cv2.findContours(maskB.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
@@ -172,10 +181,10 @@ def selectPoints(event, x, y, flag, param):
 def getBoundaryPoints():
     global frame, pts
     end_pts = []
-    cv2.namedWindow('input')
-    cv2.setMouseCallback('input', selectPoints)
+    cv2.namedWindow('input field')
+    cv2.setMouseCallback('input field', selectPoints)
     while True:
-        cv2.imshow('input', frame)
+        cv2.imshow('input field', frame)
         key = cv2.waitKey(1) & 0xFF
         if len(pts) >= 8:
             pts = np.array(pts, dtype=np.float32)
@@ -202,7 +211,7 @@ def getBoundaryPoints():
             break
         elif key == ord("q"):
             break
-    cv2.destroyWindow('input')
+    cv2.destroyWindow('input field')
     return end_pts
 
 
@@ -240,8 +249,9 @@ def drawOffsideLine():
     global M, teamB_new, op, frame
     if len(teamB_new) > 0:
         M_inv = np.linalg.inv(M)
-        p1 = np.dot(M_inv, [teamB_new[0][0], 0, 1])
-        p2 = np.dot(M_inv, [teamB_new[0][0], op.shape[0] - 1, 1])
+        last_def = np.argmin(teamB_new[:,0])
+        p1 = np.dot(M_inv, [teamB_new[last_def][0], 0, 1])
+        p2 = np.dot(M_inv, [teamB_new[last_def][0], op.shape[0] - 1, 1])
 
         pts = [(int(p1[0] / p1[2]), int(p1[1] / p1[2])), (int(p2[0] / p2[2]), int(p2[1] / p2[2]))]
         frame = cv2.line(frame, pts[0], pts[1], (255, 0, 0), 2)
@@ -287,7 +297,8 @@ def detectOffside():
             # print(teamA_new)
             if (teamB_new[0][0] > teamA_new[passerIndex][0]):
                 # if (teamB[0][0] > teamA[passerIndex][0]):
-                # print(passerIndex)#Assuming no goalie
+                # print(passerIndex)
+                # Assuming no goalie
                 print('Offside')
             else:
                 print('Not Offside')
@@ -318,7 +329,9 @@ if __name__ == '__main__':
             break
 
         frame = track_utils.resize(frame, width=400)
+
         orig_frame = frame.copy()
+
         frame2 = track_utils.removeBG(orig_frame.copy(), fgbg)
 
         detectPlayers()
@@ -334,20 +347,22 @@ if __name__ == '__main__':
         if M is not None:
             src = np.int32(src)
 
-            # print src
             for i in range(4):
-                frame = cv2.circle(frame.copy(), (src[i][0], src[i][1]), 5, (255, 0, 255), -1)
-            # frame = cv2.polylines(frame.copy(), src,True,(255,0,255),3)
+                frame = cv2.circle(frame.copy(), (src[i][0], src[i][1]), 3, (255, 0, 255), -1)
+
+            cv2.polylines(frame, np.int32([src]), True, (255, 0, 0), 2, cv2.LINE_AA)
 
             getCoordinates()
+
             drawOffsideLine()
 
-        cv2.imshow('frame', frame)
-        cv2.imshow('output', op)
+        cv2.imshow('camera view', frame)
+        cv2.imshow('top view', op)
+
         if flag:
             t = 1
         else:
-            t = 10
+            t = 100
 
         key = cv2.waitKey(t) & 0xFF
 
