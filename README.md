@@ -27,11 +27,11 @@ $ python Offside_detection.py
 ![Image](/images/point1.png)
 
 
-	*  Input patch of jersey of any player of team B in similar manner. 
+	* Input patch of jersey of any player of team B in similar manner. 
 
 ![Image](/images/point2.png)
 
-	*  Input patch of ball. 
+	* Input patch of ball. 
 
 ![Image](/images/point3.png)
 	
