@@ -90,7 +90,7 @@ We initially started learning OpenCV and Python by writing basic codes and study
 * In our application, there is still the issue of occlusion i.e. when one player blocks the view of another player. This can be resolved by using multiple viewpoints.
 * Using multiple cameras to cover entire field.
 * Using better algorithms to detect players and ball as which does not depend on colour of jersey.
-![Image](/Downloads/screenshot.png)
+![Image](https://github.com/kparth98/ITSP-Project/blob/master/soccer_half_field.jpeg)
 
 
 
