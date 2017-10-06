@@ -29,12 +29,9 @@ $ python Offside_detection.py
 	2.  Input patch of jersey of any player of team B in similar manner. 
 ![Image](/images/point2.png)
 
-
 	3.  Input patch of ball. 
 
 ![Image](/images/point3.png)
-
-
 	4.  Input two points along each side of the field in the exact order as shown i.e. Top edge, Left edge, Bottom edge then Right edge.
 
 ![Image](/images/point4.png)
