@@ -36,6 +36,7 @@ $ python Offside_detection.py
 
 
 	4.  Input two points along each side of the field in the exact order as shown i.e. Top edge, Left edge, Bottom edge then Right edge.
+
 ![Image](/images/point4.png)
 
 ### Approach to problem:
@@ -67,21 +68,29 @@ We initially started learning OpenCV and Python by writing basic codes and study
 * Convert from the default RGB space to the HSV colour space and get the range of Hue, Saturation and Value
 * Apply background subtraction to get a mask.
 * Apply the mask to the frame. 
+
 ![Image](/images/dnt1.png) ![Image](/images/dnt2.png)
 
 
 * Threshold the frames of the video to get contour of the ball which would be the contour with largest area.
+
 ![Image](/images/dnt3.png)
 * Generate a minimum enclosing circle and get center of the contour to detect the ball.
 * For tracking, do this for every frame and store points of previous 10-20 frames
 * The Pass is detected by change in trajectory which in turn is detected by a large enough change in direction of vector joining the position of center 10 frames before to the current position. This is done so as to eliminate false detection due to noise in the position of center of ball. 
+
 ![Image](/images/dnt4.png)
 ### Player Tracking:
 * We first thought of using dlib library’s correlation tracker but we realised that it became very slow if we tracked more than 3 players. Hence it could not be used for real time application.
 * We even tried HOG descriptor with SVM which is a general method of detecting humans using machine learning and comes pre-trained in /supOpenCV but it gave very disappointing results and was very slow.
-* In this case we used Histogram Backprojection to detect players from the colour of their jersey. We take a patch of jersey as input and calculate its histogram with axes hue and saturation and normalize it. ![Image](/images/pt1.png)
-* Then we used the calcBackProject function of OpenCV to generate a grayscale image where the magnitude of pixel value is proportional to its similarity to the patch given as input. ![Image](/images/pt2.png)
+* In this case we used Histogram Backprojection to detect players from the colour of their jersey. We take a patch of jersey as input and calculate its histogram with axes hue and saturation and normalize it. 
+
+![Image](/images/pt1.png)
+* Then we used the calcBackProject function of OpenCV to generate a grayscale image where the magnitude of pixel value is proportional to its similarity to the patch given as input. 
+
+![Image](/images/pt2.png)
 * We then threshold this image and apply erosion and dilation to remove noise and we obtain contours of the jersey of the players. This is separated from the noise on the basis of contour area and the fact that height of minimum enclosing square is greater than the width. 
+
 ![Image](/images/pt3.png)
 * The location of the player’s feet is approximated to be 1.5 times the height of the contour below the center of the contour
 ### Generating the top view
