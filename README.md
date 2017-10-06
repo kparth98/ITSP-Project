@@ -3,7 +3,7 @@
 ### Team Tech Titans 
 #### Team Members:-
 
-<pre>Parthasarathi Khirwadkar		 	 16D070001
+<pre>Parthasarathi Khirwadkar		 	16D070001
 Sriram Yenamandra				16D070017
 Rahul Chanduka					160070003
 Ishank Juneja					16D070012</pre>
