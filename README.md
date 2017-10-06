@@ -1,5 +1,12 @@
 ## Offside Detection System for Football
 
+### Team Tech Titans 
+#### Team Members:-
+
+<pre>Parthasarathi Khirwadkar		 	 16D070001
+Sriram Yenamandra					16D070017
+Rahul Chanduka						160070003
+Ishank Juneja						16D070012</pre>
 ### Abstract
 
 Here, we present our attempt towards the creation of a mechanism by which the problem of incorrect offside decisions made by referees in football can be addressed. The offside detection problem is simplified by classifying the attacking and defending teams based on the half in which the forward ball is played. Further the assumption that team members wear the same coloured jerseys works towards simplifying the problem.
