@@ -22,17 +22,18 @@ $ python Offside_detection.py -v 'path/name of video file'
 $ python Offside_detection.py
 ```
 * While running the program, press ***'i'*** to input and ***'q'*** to quit
-	1. Input patch of jersey of any player of team A by clicking and dragging with the mouse and making sure that background does not get included. The size of patch doesn’t matter much though it is better to have a bigger patch.
+	* Input patch of jersey of any player of team A by clicking and dragging with the mouse and making sure that background does not get included. The size of patch doesn’t matter much though it is better to have a bigger patch.
 ![Image](/images/point1.png)
 
 
-	2.  Input patch of jersey of any player of team B in similar manner. 
+	*  Input patch of jersey of any player of team B in similar manner. 
 ![Image](/images/point2.png)
 
-	3.  Input patch of ball. 
+	*  Input patch of ball. 
 
 ![Image](/images/point3.png)
-	4.  Input two points along each side of the field in the exact order as shown i.e. Top edge, Left edge, Bottom edge then Right edge.
+	
+	*  Input two points along each side of the field in the exact order as shown i.e. Top edge, Left edge, Bottom edge then Right edge.
 
 ![Image](/images/point4.png)
 
