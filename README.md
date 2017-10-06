@@ -31,6 +31,7 @@ $ python Offside_detection.py
 
 
 	3.  Input patch of ball. 
+
 ![Image](/images/point3.png)
 
 
