@@ -22,7 +22,7 @@ $ python Offside_detection.py -v 'path/name of video file'
 $ python Offside_detection.py
 ```
 * While running the program, press ***'i'*** to input and ***'q'*** to quit
-	1. Input patch of jersey of any player of team A by clicking and dragging with the mouse and making sure that background does not get included. The size of patch doesn’t matter much though it is better to have a bigger patch.
+	1. Input patch of jersey of any player of team A by clicking and dragging with the mouse and making sure that background does not get included. The size of patch doesn’t matter much though it is better to have a bigger patch.![Image](/images/point1.png)
 	2.  Input patch of jersey of any player of team B in similar manner
 	3.  Input patch of ball
 	4.  Input two points along each side of the field in the exact order as shown i.e. Top edge, Left edge, Bottom edge then Right edge.
@@ -90,7 +90,7 @@ We initially started learning OpenCV and Python by writing basic codes and study
 * In our application, there is still the issue of occlusion i.e. when one player blocks the view of another player. This can be resolved by using multiple viewpoints.
 * Using multiple cameras to cover entire field.
 * Using better algorithms to detect players and ball as which does not depend on colour of jersey.
-![Image](https://github.com/kparth98/ITSP-Project/blob/master/soccer_half_field.jpeg)
+
 
 
 
